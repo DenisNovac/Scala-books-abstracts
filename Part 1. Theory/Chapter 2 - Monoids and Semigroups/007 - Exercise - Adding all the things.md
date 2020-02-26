@@ -45,6 +45,13 @@ def addMonoidSimple[A: Monoid](items: List[A]): A =
     items.foldLeft(Monoid[A].empty)(_ |+| _)
 ```
 
+Ещё можно не требовать `A: Monoid`, но требовать инстанс:
+
+```scala
+def addAll[A](values: List[A])(implicit monoid: Monoid[A]): A =
+  values.foldRight(monoid.empty)(_ |+| _)
+```
+
 
 Теперь написать штуку чтобы складывать такой класс:
 

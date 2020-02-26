@@ -37,6 +37,10 @@ addMonoid[Option[Int]](List(Some(1), Some(2), Some(3)))
 def addMonoidSimple[A: Monoid](items: List[A]): A =
     items.foldLeft(Monoid[A].empty)(_ |+| _)
 
+// или так
+def addAll[A](values: List[A])(implicit monoid: Monoid[A]): A =
+  values.foldRight(monoid.empty)(_ |+| _)
+
 
 
 
@@ -45,22 +49,23 @@ def addMonoidSimple[A: Monoid](items: List[A]): A =
 case class Order(totalCost: Double, quantity: Double)
 
 implicit val orderInstance: Monoid[Order] = new Monoid[Order] {
-  override def empty = Order(0, 0)
+    override def empty = Order(0, 0)
 
-  override def combine(x: Order, y: Order) = {
-    Order(x.totalCost + y.totalCost, x.quantity + y.quantity)
+    override def combine(x: Order, y: Order) =
+      Order(x.totalCost + y.totalCost, x.quantity + y.quantity)
   }
-}
-
 
 // выводилка в консоль
 
-val someOrder = addMonoidSimple(List(Order(1,2), Order(3,4)))
+val someOrder = addMonoidSimple(List(Order(1, 2), Order(3, 4)))
+val someOrder2 = addAll(List(Order(1, 2), Order(3, 4)))
 
 implicit val orderShow: Show[Order] = new Show[Order] {
-  override def show(t: Order) = s"Order(${t.totalCost}, ${t.quantity})"
-}
+    override def show(t: Order) = s"Order(${t.totalCost}, ${t.quantity})"
+  }
 
 import cats.syntax.show._
 
-someOrder.show  // Order(4.0, 6.0)
+someOrder.show // Order(4.0, 6.0)
+someOrder2.show
+
