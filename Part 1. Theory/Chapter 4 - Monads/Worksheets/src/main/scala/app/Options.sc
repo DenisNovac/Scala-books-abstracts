@@ -6,9 +6,18 @@ def parseInt(str: String): Option[Int] =
 def divide(a: Int, b: Int): Option[Int] =
   if (b == 0) None else Some(a / b)
 
-/** FlatMap позволяет игнорировать это при последовательных вычислениях */
 
 def stringDivideBy(aStr: String, bStr: String): Option[Int] =
+  parseInt(aStr).flatMap { aNum =>
+    parseInt(bStr).flatMap { bNum =>
+      divide(aNum, bNum)
+    }
+  }
+
+
+/** FlatMap позволяет игнорировать это при последовательных вычислениях */
+
+def stringDivideByFlatMap(aStr: String, bStr: String): Option[Int] =
   for {
     aNum <- parseInt(aStr)
     bNum <- parseInt(bStr)
@@ -18,4 +27,4 @@ def stringDivideBy(aStr: String, bStr: String): Option[Int] =
 
 stringDivideBy("1", "2")
 stringDivideBy("1", "0")
-stringDivideBy("3", "2")
+stringDivideByFlatMap("3", "2")
