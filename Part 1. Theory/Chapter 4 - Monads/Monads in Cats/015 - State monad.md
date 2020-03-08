@@ -122,3 +122,85 @@ val program: State[Int, (Int, Int, Int)] = for {
 val (state, result) = program.run(1).value // state: Int = 3  result: (Int, Int, Int) = (1,2,3000)
 ```
 
+## Упражнение: Post-Order Calculator
+
+Монада State позволяет имплементировать простые интерпретаторы для сложных выражений, передавая значения мутабельных регистров вместе с результатом. Мы можем увидеть это наглядно, создав калькулятор для выражений в обратной нотации.
+
+Post-order expressions - это математическая нотация, в которой мы пишем опреатор после операндов:
+
+```scala
+1 2 +
+```
+
+Все, что нужно для реализации - пройти значения слева-направо, накопив стек операндов:
+
+- Если мы видим число - помещаем в стек;
+- Если мы видим оператор - мы достаём два операнда из стека, используем оператор и кладём в стек результат.
+
+Это позволяет реализовывать сложные выражения без оглядки на порядок действий.
+
+```scala
+/** Exercise 4.9.3 - Post-Order Calculator */
+import cats.data.State
+
+type CalcState[A] = State[List[Int], A]
+
+def operand(num: Int): CalcState[Int] =
+  State[List[Int], Int] { stack =>
+    (num :: stack, num)
+  }
+
+def operator(func: (Int, Int) => Int): CalcState[Int] =
+  State[List[Int], Int] {
+    case b :: a :: tail =>
+      val ans = func(a, b)
+      (ans :: tail, ans)
+
+    case _ =>
+      sys.error("Fail")
+  }
+
+def evalOne(sym: String): CalcState[Int] =
+  sym match {
+    case "+" => operator(_ + _)
+    case "-" => operator(_ - _)
+    case "*" => operator(_ * _)
+    case "/" => operator(_ / _)
+    case num => operand(num.toInt)
+  }
+val e = evalOne("42").runA(Nil).value  // 42
+```
+
+Это работает следующим образом. Если входной символ является математическим сивмолом - из старого стека вынимаются a и b, а взамен кладётся ans. Иначе вызывается функция operand, которая просто кладёт число в стек спереди. 
+
+Функция `evalOne` позволяет создать стек из первого числа 42 и инициализирующего стека `Nil`.
+
+
+```scala
+val program = for {
+    _   <- evalOne("1")
+    _   <- evalOne("2")
+    ans <- evalOne("+")
+
+  } yield ans
+
+program.runA(Nil).value  // 3
+```
+
+Таким образом можно организовать вычисления.
+
+Наконец, метод evalAll:
+
+```scala
+import cats.syntax.all._
+
+/** Функция собственно вычисления */
+def evalAll(input: List[String]): CalcState[Int] =
+  input.foldLeft(0.pure[CalcState]) { (a,b) =>
+    a.flatMap(_ => evalOne(b))
+  }
+
+evalAll(List("1", "2", "+", "3", "*")).runA(Nil).value  // 9
+```
+
+
