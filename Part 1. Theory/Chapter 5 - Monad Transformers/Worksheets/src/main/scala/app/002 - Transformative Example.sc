@@ -14,10 +14,10 @@ result1.flatMap { x =>
   }
 }  // res0: cats.data.OptionT[List,Int] = OptionT(List(Some(42)))
 
+/** Сложение листов */
+import cats.syntax.monoid._
 
-
-
-
+val l = OptionT.pure(1) |+| OptionT.pure(2)
 
 
 
