@@ -100,3 +100,13 @@ futureEitherOr.value.value  // res1: scala.concurrent.Future[Either[String,Optio
 ```
 
 Каждый вызов `value` распаковывает один монадный трансформер. 
+
+## Default Instances
+
+Многие дефолтные инстансы монад в Cats определены через трансформер и монаду Id следующим образом:
+
+```scala
+type Reader[E, A] = ReaderT[Id, E, A]
+```
+
+Но в некоторых случаях монады и конструкторы разделены. В этих случаях методы из трансформера зераклируют методы монады. Например, OptionT имеет метод getOrElse, а EitherT - fold, bitmap, swap и другие.
