@@ -25,3 +25,19 @@ Semigroupal[Option].product(Some(123), None) // res1: Option[(Int, Nothing)] = N
 ```
 
 Если какой-то из параметров None - весь Semigroupal будет равен None.
+
+## Соединение трёх или более контекстов
+
+```scala
+Semigroupal.tuple3(Option(1), Option(2), Option(3))  
+// res2: Option[(Int, Int, Int)] = Some((1,2,3))
+Semigroupal.tuple3(Option(1), Option(2), Option.empty[Int])  
+// res3: Option[(Int, Int, Int)] = None
+
+Semigroupal.map3(Option(1), Option(2), Option(3))(_ + _ + _)  
+// res4: Option[Int] = Some(6)
+```
+
+tuple, map, contramap и imap существуют в вариациях от 2 до 22.
+
+
