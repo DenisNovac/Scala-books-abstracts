@@ -10,13 +10,12 @@ class CatApply extends Apply[Cat] {
     Cat(func(fa.id))
   }
 
+  // Оверрайд map из functor
   override def map[A, B](fa: Cat[A])(f: A => B): Cat[B] = Cat(f(fa.id))
 }
 
 implicit val apply = new CatApply
 def f(s: String): Int = s.length
-
-//Cat("Sammy").map - такого метода ещё нет
 
 // нужно явно показать, что в Cat передаётся функция
 Apply[Cat].ap(Cat[String => Int](_.length))(Cat("Sam"))
@@ -25,13 +24,17 @@ Apply[Cat].ap(Cat(f(_)))(Cat("Sam"))
 
 Apply[Cat].ap(Cat[String => String](_ => "Joseph"))(Cat("Sam"))  // Cat(Joseph)
 
+// Можно вызвать и map
+Apply[Cat].map(Cat("Stella"))(name => (name.map(_ + "a")).mkString(""))  // Cat(Sataealalaaa)
 
-/** Apply позволяет делать примерно то же, что и map, но функцию нужно сначала обернуть в тип */
+/** Apply позволяет делать примерно то же, что и map, но функцию нужно сначала обернуть в тип
+ *  При этом map нужно оверрайдить руками. Applicative делает всё то же самое, но map оверрайдить не надо.
+ * */
 
 
 
 
-/** Applicative добавляет pure, благодаря которому можно вызвать map очень легко */
+/** Applicative добавляет pure, а map уже захардкожен через ap и pure */
 
 case class Dog[A](id: A)
 
