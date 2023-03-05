@@ -9,6 +9,9 @@ import natchez.Trace.Implicits.noop
 import skunk.Session
 import skunk.codec.all._
 import skunk.implicits._
+import skunk.Fragment
+import skunk.Void
+import skunk.Query
 
 object Skunk extends IOApp {
 
@@ -69,17 +72,34 @@ object Skunk extends IOApp {
     VALUES ($countryC)
     """.command
 
-  private val selectCmd =
+  private val selectFragment: Fragment[Void] =
+    sql"""
+    SELECT * FROM country
+    """
+
+  private val selectQuery =
     sql"""
     SELECT * FROM country
     """.query(countryC)
 
+  private val whereFragment: Fragment[String] =
+    sql"""
+    WHERE name = $varchar
+    """
+
+  private val whereQuery: Query[String, Country] =
+    (selectFragment ~> whereFragment)
+      .query(countryC)
+
   private def executeCommands(s: Session[IO]) = for {
     _        <- s.prepare(insertCmd).flatMap { c =>
-                  c.execute(Country(1L, "Argentina"))
+                  c.execute(Country(1L, "Paris"))
                 }
-    response <- s.execute(selectCmd)
+    response <- s.execute(selectQuery)
     _        <- Console[IO].println(response.mkString("\n"))
+    _        <- Console[IO].println("")
+    where    <- s.execute(whereQuery, "Paris")
+    _        <- Console[IO].println(where.mkString("\n"))
   } yield ()
 
   override def run(args: List[String]): IO[ExitCode] = {
