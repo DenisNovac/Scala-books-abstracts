@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:alpine3.17
+    container_name: db
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/1-schema.sql
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres

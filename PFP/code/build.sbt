@@ -4,7 +4,7 @@ version      := "0.1"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "code",
+    name                                  := "code",
     libraryDependencies ++= Seq(
       compilerPlugin(
         ("org.typelevel" %% "kind-projector" % "0.13.2").cross(CrossVersion.full)
@@ -14,6 +14,7 @@ lazy val root = (project in file("."))
     ),
     libraryDependencies ++= Dependencies.cats,
     libraryDependencies ++= Dependencies.catsEffect,
+    libraryDependencies += "org.tpolecat" %% "skunk-core" % "0.5.1",
     scalacOptions ++= Seq(
       "-Ymacro-annotations",
       "-Wconf:cat=unused:info"
