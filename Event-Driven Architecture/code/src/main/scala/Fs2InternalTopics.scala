@@ -2,6 +2,7 @@ import cats.Applicative
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import cats.effect.std.Queue
 import fs2.Stream
+import cats.implicits._
 
 import scala.concurrent.duration.*
 
@@ -29,19 +30,22 @@ object Consumer:
   def local[F[_]: Applicative, A](
       queue: Queue[F, Option[A]]
   ): Consumer[F, A] = new:
-    def receiveM: Stream[F, Msg[A]] =
-      receive.map(Msg("N/A", Map.empty, _))
 
     def receive: Stream[F, A] =
       Stream.fromQueueNoneTerminated(queue)
 
-    def ack(id: Consumer.MsgId): F[Unit] = Applicative[F].unit
+    // no metadata in queue
+    def receiveM: Stream[F, Msg[A]] =
+      receive.map(Msg("N/A", Map.empty, _))
 
-    def nack(id: Consumer.MsgId): F[Unit] = Applicative[F].unit
+    // no such concepts in in-memory queue
+    def ack(id: Consumer.MsgId): F[Unit]       = Applicative[F].unit
+    def nack(id: Consumer.MsgId): F[Unit]      = Applicative[F].unit
+    def ack(ids: Set[Consumer.MsgId]): F[Unit] = Applicative[F].unit
 
-    def receiveM(id: Consumer.MsgId): Stream[F, Consumer.Msg[A]] = ???
-    def ack(ids: Set[Consumer.MsgId]): F[Unit]                   = ???
-    def lastMsgId: F[Option[Consumer.MsgId]]                     = ???
+    // not implemented
+    def receiveM(id: Consumer.MsgId): Stream[F, Consumer.Msg[A]] = Stream.empty
+    def lastMsgId: F[Option[Consumer.MsgId]]                     = Option.empty.pure[F]
 
 object Producer:
   def local[F[_]: Applicative, A](
