@@ -17,6 +17,9 @@ object Skunk extends IOApp {
 
   type Pool = Resource[IO, Resource[IO, Session[IO]]]
 
+  @deprecated("heh", "1.0")
+  def what: String = "what"
+
   case class DatabaseConfig(
       host: String = "localhost",
       port: Int = 5432,
